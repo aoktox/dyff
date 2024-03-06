@@ -39,6 +39,7 @@ const (
 // BriefReport is a reporter that only prints a summary
 type BriefReport struct {
 	Report
+	DoNotShowNochanges bool
 }
 
 // WriteReport writes a brief summary to the provided writer
@@ -59,6 +60,9 @@ func (report *BriefReport) WriteReport(out io.Writer) error {
 		template = twoline
 	}
 
+	if len(report.Diffs) == 0 && report.DoNotShowNochanges {
+		return nil
+	}
 	_, _ = writer.WriteString(fmt.Sprintf(template,
 		noOfChanges,
 		niceFrom,

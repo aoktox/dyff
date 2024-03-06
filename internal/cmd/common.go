@@ -44,6 +44,7 @@ type reportConfig struct {
 	kubernetesEntityDetection bool
 	noTableStyle              bool
 	doNotInspectCerts         bool
+	doNotShowNochanges        bool
 	exitWithCode              bool
 	omitHeader                bool
 	useGoPatchPaths           bool
@@ -63,6 +64,7 @@ var defaults = reportConfig{
 	kubernetesEntityDetection: true,
 	noTableStyle:              false,
 	doNotInspectCerts:         false,
+	doNotShowNochanges:        false,
 	exitWithCode:              false,
 	omitHeader:                false,
 	useGoPatchPaths:           false,
@@ -81,6 +83,7 @@ func applyReportOptionsFlags(cmd *cobra.Command) {
 	// Compare options
 	cmd.Flags().BoolVarP(&reportOptions.ignoreOrderChanges, "ignore-order-changes", "i", defaults.ignoreOrderChanges, "ignore order changes in lists")
 	cmd.Flags().BoolVarP(&reportOptions.ignoreWhitespaceChanges, "ignore-whitespace-changes", "", defaults.ignoreWhitespaceChanges, "ignore whitespace changes in lists")
+	cmd.Flags().BoolVarP(&reportOptions.doNotShowNochanges, "hide-no-changes", "", defaults.doNotShowNochanges, "hide no changes output from brief format")
 	cmd.Flags().BoolVarP(&reportOptions.kubernetesEntityDetection, "detect-kubernetes", "", defaults.kubernetesEntityDetection, "detect kubernetes entities")
 	cmd.Flags().StringArrayVar(&reportOptions.additionalIdentifiers, "additional-identifier", defaults.additionalIdentifiers, "use additional identifier candidates in named entry lists")
 	cmd.Flags().StringSliceVar(&reportOptions.filters, "filter", defaults.filters, "filter reports to a subset of differences based on supplied arguments")
@@ -218,7 +221,8 @@ func writeReport(cmd *cobra.Command, report dyff.Report) error {
 
 	case "brief", "short", "summary":
 		reportWriter = &dyff.BriefReport{
-			Report: report,
+			Report:             report,
+			DoNotShowNochanges: reportOptions.doNotShowNochanges,
 		}
 
 	default:
