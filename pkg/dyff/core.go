@@ -38,6 +38,7 @@ type CompareOption func(*compareSettings)
 type compareSettings struct {
 	NonStandardIdentifierGuessCountThreshold int
 	IgnoreOrderChanges                       bool
+	IgnoreWhitespaceChanges                  bool
 	KubernetesEntityDetection                bool
 	AdditionalIdentifiers                    []string
 }
@@ -64,6 +65,13 @@ func NonStandardIdentifierGuessCountThreshold(nonStandardIdentifierGuessCountThr
 	}
 }
 
+// IgnoreWhitespaceChanges disables the detection for changes of the order in lists
+func IgnoreWhitespaceChanges(value bool) CompareOption {
+	return func(settings *compareSettings) {
+		settings.IgnoreWhitespaceChanges = value
+	}
+}
+
 // IgnoreOrderChanges disables the detection for changes of the order in lists
 func IgnoreOrderChanges(value bool) CompareOption {
 	return func(settings *compareSettings) {
@@ -87,6 +95,7 @@ func CompareInputFiles(from ytbx.InputFile, to ytbx.InputFile, compareOptions ..
 		settings: compareSettings{
 			NonStandardIdentifierGuessCountThreshold: 3,
 			IgnoreOrderChanges:                       false,
+			IgnoreWhitespaceChanges:                  false,
 			KubernetesEntityDetection:                true,
 		},
 	}
@@ -597,14 +606,16 @@ func (compare *compare) namedEntryLists(path ytbx.Path, identifier listItemIdent
 func (compare *compare) nodeValues(path ytbx.Path, from *yamlv3.Node, to *yamlv3.Node) ([]Diff, error) {
 	result := make([]Diff, 0)
 	if strings.Compare(from.Value, to.Value) != 0 {
-		result = append(result, Diff{
-			&path,
-			[]Detail{{
-				Kind: MODIFICATION,
-				From: from,
-				To:   to,
-			}},
-		})
+		if !compare.settings.IgnoreWhitespaceChanges && isWhitespaceOnlyChange(from.Value, to.Value) {
+			result = append(result, Diff{
+				&path,
+				[]Detail{{
+					Kind: MODIFICATION,
+					From: from,
+					To:   to,
+				}},
+			})
+		}
 	}
 
 	return result, nil
