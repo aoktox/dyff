@@ -1,23 +1,23 @@
 ---
 builds:
   - env:
-    - CGO_ENABLED=0
+      - CGO_ENABLED=0
     goos:
-    - windows
-    - linux
-    - darwin
+      - windows
+      - linux
+      - darwin
     goarch:
-    - amd64
-    - arm64
+      - amd64
+      - arm64
     main: ./cmd/dyff/main.go
     flags:
-    - -trimpath
+      - -trimpath
     ldflags:
-    - -s -w -extldflags "-static" -X github.com/homeport/dyff/internal/cmd.version={{.Version}}
-    mod_timestamp: '{{ .CommitTimestamp }}'
+      - -s -w -extldflags "-static" -X github.com/homeport/dyff/internal/cmd.version={{.Version}}
+    mod_timestamp: "{{ .CommitTimestamp }}"
 
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 
 snapshot:
   name_template: "{{ .Tag }}-next"
@@ -30,23 +30,5 @@ changelog:
   sort: ""
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
-
-brews:
-- repository:
-    owner: homeport
-    name: homebrew-tap
-    token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-  url_template: "https://github.com/homeport/dyff/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-  download_strategy: CurlDownloadStrategy
-  commit_author:
-    name: GoReleaser Bot
-    email: goreleaser@carlosbecker.com
-  folder: HomebrewFormula
-  homepage: "https://github.com/homeport/dyff"
-  description: "δyƒƒ /ˈdʏf/ - A diff tool for YAML files, and sometimes JSON"
-  license: "MIT"
-  skip_upload: false
-  test: |
-    system "#{bin}/dyff version"
+      - "^docs:"
+      - "^test:"
