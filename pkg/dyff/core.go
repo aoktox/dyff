@@ -606,16 +606,18 @@ func (compare *compare) namedEntryLists(path ytbx.Path, identifier listItemIdent
 func (compare *compare) nodeValues(path ytbx.Path, from *yamlv3.Node, to *yamlv3.Node) ([]Diff, error) {
 	result := make([]Diff, 0)
 	if strings.Compare(from.Value, to.Value) != 0 {
-		if !compare.settings.IgnoreWhitespaceChanges && isWhitespaceOnlyChange(from.Value, to.Value) {
-			result = append(result, Diff{
-				&path,
-				[]Detail{{
-					Kind: MODIFICATION,
-					From: from,
-					To:   to,
-				}},
-			})
+
+		if compare.settings.IgnoreWhitespaceChanges && isWhitespaceOnlyChange(from.Value, to.Value) {
+			return result, nil
 		}
+		result = append(result, Diff{
+			&path,
+			[]Detail{{
+				Kind: MODIFICATION,
+				From: from,
+				To:   to,
+			}},
+		})
 	}
 
 	return result, nil
