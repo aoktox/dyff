@@ -58,10 +58,15 @@ type HumanReport struct {
 	DoNotInspectCerts     bool
 	OmitHeader            bool
 	UseGoPatchPaths       bool
+	DoNotShowNochanges    bool
 }
 
 // WriteReport writes a human readable report to the provided writer
 func (report *HumanReport) WriteReport(out io.Writer) error {
+	if len(report.Diffs) == 0 && report.DoNotShowNochanges {
+		return nil
+	}
+
 	writer := bufio.NewWriter(out)
 	defer writer.Flush()
 
